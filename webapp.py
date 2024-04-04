@@ -5,6 +5,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 import joblib
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Load the trained models and define functions
 def load_models():
@@ -217,7 +218,8 @@ def compare_and_sort_crops(average_yields, predicted_results):
 
     # Sort crops based on yield difference
     sorted_crops = sorted(differences.keys(), key=lambda x: differences[x]['Yield Difference'], reverse=True)[:3]
-    return sorted_crops
+    # return sorted_crops
+    return {crop: differences[crop] for crop in sorted_crops}
 
 def average_col(df):
     return df['Yield (Tonnes/Hectare)'].mean()
@@ -300,15 +302,61 @@ def main():
         predicted_yields = predict_yield_for_all_crops(pipeline_paths, new_input, crop_district_averages)
 
         # Compare predicted yields with average yields and sort crops
-        sorted_crops = compare_and_sort_crops(average_yields=yield_average, predicted_results=predicted_yields)
+        top_crops_with_details = compare_and_sort_crops(average_yields=yield_average, predicted_results=predicted_yields)
 
-        # Display top 3 crops with nutrient recommendations
-        st.header('Top 3 Recommended Crops:')
-        for crop in sorted_crops:
-            st.subheader(crop.capitalize())
-            st.write('Nutrient Recommendations:')
-            for recommendation in predicted_yields[crop]['Nutrient Recommendations']:
-                st.write(f"- {recommendation}")
+        st.header('Top 3 Recommended Crops with Historical Yields:')
+        for crop, details in top_crops_with_details.items():
+            # Create two columns: one for text data and the other for the plot
+            col1, col2 = st.columns([2, 3])  # Adjust the ratio as needed
+            
+            with col1:
+                st.subheader(f"{crop.capitalize()} Recommendations:")
+                st.write(f"Predicted Yield Difference: {details['Yield Difference']:.2f} Tonnes/Hectare")
+                st.write('Nutrient Recommendations:')   
+                for recommendation in details['Nutrient Recommendations']:
+                    st.write(f"- {recommendation}")
+            
+            # Display the historical yield plot in the second column
+            with col2:
+                df_map = {
+                    'sugarcane': df_sugarcane,
+                    'potato': df_potato,
+                    'rice': df_rice,
+                    'wheat': df_wheat,
+                    'mustard': df_mustard,
+                    'bajra': df_bajra,
+                }
+                df_crop = df_map[crop].copy()
+                df_crop['District'] = df_crop['District'].str.lower()
+                district_data = df_crop[df_crop['District'] == district.lower()].copy()
+
+                if not district_data.empty:
+                    plt.figure(figsize=(8, 6))  # Increase the figure size for better visibility
+                    district_data = district_data.sort_values(by='Start_Year')
+                    plt.plot(district_data['Start_Year'], district_data['Yield (Tonnes/Hectare)'], marker='o', linestyle='-', label=crop.capitalize())
+                    plt.title(f'Historical Yield for {crop.capitalize()} in {district.capitalize()}')
+                    plt.xlabel('Year')
+                    plt.ylabel('Yield (Tonnes/Hectare)')
+                    
+                    years = district_data['Start_Year'].unique()
+                    num_years = len(years)
+                    
+                    if num_years <= 10:
+                        plt.xticks(years, [int(year) for year in years])
+                    else:
+                        # Display every 2nd or 3rd year on the x-axis
+                        step = 2 if num_years <= 20 else 3
+                        plt.xticks(years[::step], [int(year) for year in years[::step]])
+                    
+                    plt.xticks(rotation=45)  # Rotate the x-axis labels by 45 degrees
+                    plt.tight_layout()  # Adjust the layout to prevent label overlapping
+                    
+                    plt.grid(True)
+                    plt.legend()
+                    col2.pyplot(plt)
+                else:
+                    col2.write(f"No historical yield data available for {crop.capitalize()} in {district.capitalize()}.")
+           
 
 if __name__ == "__main__":
     main()
