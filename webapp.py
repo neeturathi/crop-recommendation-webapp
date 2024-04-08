@@ -235,7 +235,7 @@ def main():
     district_options = ['agra', 'aligarh', 'allahabad', 'ambedkar nagar', 'amethi', 'amroha', 'auraiya', 'azamgarh', 'baghpat', 'bahraich', 'ballia', 'balrampur', 'banda', 'barabanki', 'bareilly', 'basti', 'bijnor', 'budaun', 'bulandshahr', 'chandauli', 'chitrakoot', 'deoria', 'etah', 'etawah', 'faizabad', 'farrukhabad', 'fatehpur', 'firozabad', 'gautam buddha nagar', 'ghaziabad', 'ghazipur', 'gonda', 'gorakhpur', 'hamirpur', 'hapur', 'hardoi', 'hathras', 'jalaun', 'jaunpur', 'jhansi', 'kannauj', 'kanpur dehat', 'kanpur nagar', 'kasganj', 'kaushambi', 'kheri', 'kushi nagar', 'lalitpur', 'lucknow', 'maharajganj', 'mahoba', 'mainpuri', 'mathura', 'mau', 'meerut', 'mirzapur', 'moradabad', 'muzaffarnagar', 'pilibhit', 'pratapgarh', 'rae bareli', 'rampur', 'saharanpur', 'sambhal', 'sant kabeer nagar', 'sant ravidas nagar', 'shahjahanpur', 'shamli', 'shravasti', 'siddharth nagar', 'sitapur', 'sonbhadra', 'sultanpur', 'unnao', 'varanasi']
     district = st.selectbox('Select District:', district_options)
     area = st.number_input('Enter Area (Hectare):', min_value=0)
-    season = st.selectbox('Select Season:', ['Kharif', 'Rabi', 'Summer'])
+    season = st.selectbox('Select Season:', ['Kharif', 'Rabi'])
     N = st.number_input('N (Nitrogen):')
     P2O5 = st.number_input('P2O5 (Phosphorus):')
     K2O = st.number_input('K2O (Potassium):')
