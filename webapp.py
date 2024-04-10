@@ -206,20 +206,46 @@ def calculate_district_averages_last_5_years(df_crop):
     return district_averages
 
 # Function to compare predicted yields with average yields and sort crops
-def compare_and_sort_crops(average_yields, predicted_results):
+# def compare_and_sort_crops(average_yields, predicted_results):
+#     differences = {}
+#     for crop, data in predicted_results.items():
+#         # Calculate the difference in yield
+#         yield_difference = data['Predicted Yield'] - average_yields[crop]
+#         differences[crop] = {
+#             'Yield Difference': yield_difference,
+#             'Nutrient Recommendations': data['Nutrient Recommendations']
+#         }
+
+#     # Sort crops based on yield difference
+#     sorted_crops = sorted(differences.keys(), key=lambda x: differences[x]['Yield Difference'], reverse=True)[:3]
+#     # return sorted_crops
+#     return {crop: differences[crop] for crop in sorted_crops}
+
+
+def compare_and_sort_crops_with_season(average_yields, predicted_results, selected_season):
+    # season_crops = {
+    #     'Rabi': ['wheat', 'mustard'],
+    #     'Kharif': ['sugarcane', 'potato', 'rice', 'bajra']
+    # }
+    season_crops = {'Kharif': ['sugarcane', 'bajra', 'rice'], 'Rabi': ['mustard', 'potato', 'wheat']}
+
     differences = {}
     for crop, data in predicted_results.items():
         # Calculate the difference in yield
-        yield_difference = data['Predicted Yield'] - average_yields[crop]
+        yield_difference = data['Predicted Yield'] - average_yields.get(crop, 0)
+        is_selected_season = crop in season_crops[selected_season]
         differences[crop] = {
             'Yield Difference': yield_difference,
-            'Nutrient Recommendations': data['Nutrient Recommendations']
+            'Nutrient Recommendations': data['Nutrient Recommendations'],
+            'Is Selected Season': is_selected_season
         }
 
-    # Sort crops based on yield difference
-    sorted_crops = sorted(differences.keys(), key=lambda x: differences[x]['Yield Difference'], reverse=True)[:3]
-    # return sorted_crops
+    # Prioritize crops of the selected season, then sort by yield difference
+    sorted_crops = sorted(differences.keys(), key=lambda x: (-differences[x]['Is Selected Season'], -differences[x]['Yield Difference']))
+
     return {crop: differences[crop] for crop in sorted_crops}
+
+
 
 def average_col(df):
     return df['Yield (Tonnes/Hectare)'].mean()
@@ -301,8 +327,11 @@ def main():
         # Predict yield for all crops
         predicted_yields = predict_yield_for_all_crops(pipeline_paths, new_input, crop_district_averages)
 
+        
         # Compare predicted yields with average yields and sort crops
-        top_crops_with_details = compare_and_sort_crops(average_yields=yield_average, predicted_results=predicted_yields)
+        # top_crops_with_details = compare_and_sort_crops(average_yields=yield_average, predicted_results=predicted_yields)
+        top_crops_with_details = compare_and_sort_crops_with_season(average_yields=yield_average, predicted_results=predicted_yields, selected_season=season)
+
 
         st.header('Top 3 Recommended Crops with Historical Yields:')
         for crop, details in top_crops_with_details.items():
