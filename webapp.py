@@ -194,7 +194,7 @@ def classify_soil_nutrient(N, P2O5, K2O, predicted_class):
 
 # Function to calculate district-wise averages for weather parameters
 def calculate_district_averages_last_5_years(df_crop):
-    last_5_years_data = df_crop[df_crop['Start_Year'].isin(range(2017, 2022))]  # Assuming data for 2022 is not available yet
+    last_5_years_data = df_crop[df_crop['Start_Year'].isin(range(2015, 2022))]  # Assuming data for 2022 is not available yet
     numeric_columns = last_5_years_data.select_dtypes(include=[np.number])
     
     # Add the 'District' column to the numeric columns for grouping
