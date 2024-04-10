@@ -243,7 +243,7 @@ def compare_and_sort_crops_with_season(average_yields, predicted_results, select
     # Prioritize crops of the selected season, then sort by yield difference
     sorted_crops = sorted(differences.keys(), key=lambda x: (-differences[x]['Is Selected Season'], -differences[x]['Yield Difference']))
 
-    return {crop: differences[crop] for crop in sorted_crops}
+    return {crop: differences[crop] for crop in sorted_crops[:3]}  # Return only the top 3 recommended crops
 
 
 
